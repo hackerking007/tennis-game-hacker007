@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=<device-width>, initial-scale=1.0">
     <title>Document</title>
 </head>
 <body>
@@ -18,7 +17,25 @@
         var framePerSecond = 30;
         var ballX = 50;
         var ballSpeedX = 15;
+        var ballY = 50;
+        var ballSpeedY = 7;
+        
+        var paddle1Y = 250;
+        var paddle2Y = 250;
+        const PADDLE_HEIGHT = 100;
+        const PADDLE_THICKNESS = 10;
+        function calculateMousePos(evt) {
+            var rect = canvas.getBoundingClientRect();
+            var root = document.documentElement;
+            var mouseX = evt.clientX - rect.left - root.scrollLeft;
+            var mouseY = evt.clientY - rect.top - root.scrollTop;
+            return{
+                x:mouseX,
+                y:mouseY
+            };
+        }
 
+        
         window.onload = function(){
         canvas = document.getElementById('gameCanvas');
         canvasContext = canvas.getContext('2d');
@@ -27,17 +44,44 @@
             moveEverything();
             drawEverything();
         }, 1000/framePerSecond);
-       
+
+
+            canvas.addEventListener('mousemove', function(evt) {
+                var mousePos = calculateMousePos(evt);
+                paddle1Y = mousePos.y-(PADDLE_HEIGHT/2);
+            })
     }
+
+    function ballReset(){
+        ballSpeedX = -ballSpeedX
+        ballX = canvas.width/2;
+        ballY = vanvas.height/2;
+    }
+    
+
 
      function moveEverything(){
         ballX = ballX + ballSpeedX;
+        ballY = ballY + ballSpeedY
         if(ballX <= 0){
-           ballSpeedX = -ballSpeedX
+            if(ballY > paddle1Y && ballY < paddle1Y+PADDLE_HEIGHT){
+                ballSpeedX = -ballSpeedX
+            }
+            else{
+                ballReset();
+            }
+        
         }
        
-        if(ballX >= canvas.width){
+        if(ballX > 800){
            ballSpeedX = -ballSpeedX
+        }
+        if(ballY <= 0){
+           ballSpeedY = -ballSpeedY
+        }
+       
+        if(ballY >= 590){
+           ballSpeedY = -ballSpeedY
         }
      }
     
@@ -46,9 +90,11 @@
         //next line blanks out the screen with black
         colorRect(0,0,canvas.width,canvas.height,'black');
         //next line draws the left paddle
-        colorRect(0,210,10,100,'white');
+        colorRect(0,paddle1Y,PADDLE_THICKNESS,PADDLE_HEIGHT,'white');
+          //next line draws the right computer paddle
+          colorRect(canvas.width-10,paddle2Y,PADDLE_THICKNESS,PADDLE_HEIGHT,'white');
         //next line draws the ball
-       colorCircle(ballX, 150, 10, 'white')
+       colorCircle(ballX, ballY, 10, 'white')
     }
 
     function colorCircle(centerX, centerY, radius, drawColor){
